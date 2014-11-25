@@ -1,0 +1,63 @@
+#include "xmas_tree.h"
+
+static void _xmas_alloc_rows( FR_xmas_tree * self , unsigned int row_count ){
+  self->row_count = row_count;
+  self->rows = malloc( sizeof( FR_barray ) * row_count );
+}
+
+FR_xmas_tree * FR_xmas_tree_new( unsigned int set_size ){
+  FR_xmas_tree * out = calloc( 1 , sizeof( FR_xmas_tree ) );
+
+  if( set_size <= 1 ){
+    unsigned char order1[2] = {0 , 1};
+    _xmas_alloc_rows( out , 1 );
+    out->rows[0] = FR_barray_new_arr( 2 , order1 );
+    return out;
+  }
+  else if( set_size == 2 ){
+    unsigned char row1[2] = {1 , 0};
+    unsigned char row2[]  = { 0 , 0 ,    0 , 1 ,   1 , 1 };
+    _xmas_alloc_rows( out , 2 );
+    out->rows[0] = FR_barray_new_arr( 2 , row1 );
+    out->rows[1] = FR_barray_new_arr( 6 , row2 );
+    return out;
+  }
+
+  FR_xmas_tree * prev = FR_xmas_tree_new( set_size -1 );
+  out->set_size = set_size;
+
+  _xmas_alloc_rows( out , prev->rows*2 );
+
+  unsigned int nr_it = 0;
+  
+  for( int r = 0 ; r < prev->row_count ; r++ ){
+    s = (prev->rows[r].len / prev->set_size);
+    if( s > 1 ){
+      for( int is = 1 ; is < s ; is++ ){ /* copy tuplet and add 0 starting from 1 */
+        out->rows[nr_it] = FR_barray_new( (s-1) * set_size );
+        FR_barray_copy_tuplet( out->rows[nr_it] , prev->rows[r] , is * prev->set_size , set_size*is , prev->set_size );
+        FR_barray_set( out->rows[nr_it] , (is*prev->set_size)+prev->set_size , 0 );
+      }
+      nr_it++;
+    } /* else omit */
+
+    /* s_0 . 0 */
+    out->rows[nr_it] = FR_barray_new( (s+1) * set_size );
+    FR_barray_copy_tuplet( out->rows[nr_it] , prev->rows[r] , 0 , 0 , prev->set_size );
+    FR_barray_set( out->rows[nr_it] , set_size-1 , 0 );
+
+    /* s_1 . 1 | s_2 . 1 | ... | s_s-1 . 1 */
+    for( int is = 1 ; is < s ; is++ ){
+      FR_barray_copy_tuplet( out->rows[nr_it] , prev->rows[r] , is * prev->set_size , set_size*is , prev->set_size );
+      FR_barray_set( out->rows[nr_it] , (is*prev->set_size)+prev->set_size , 1 );
+    }
+  }
+
+  if( nr_it < out->row_count ){
+    out->row_count = nr_it+1;
+    out->rows = realloc( out->rows , sizeof( FR_barray* ) * out->row_count );
+  }
+
+  free( prev );
+  return out;
+}

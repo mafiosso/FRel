@@ -1,0 +1,52 @@
+#include "binary_array.h"
+
+FR_barray * FR_barray_new( unsigned int bits_count )
+{
+  unsigned char * chunk = calloc( (bits_count/8) + ((bits_count%8) > 0) , sizeof( unsigned char ) );
+  FR_barray * out = malloc( sizeof( FR_barray ) );
+  out->chunk = chunk;
+  out->len = bits_count;
+  return out;
+}
+
+FR_barray * FR_barray_new_arr( unsigned int count , unsigned char * arr ){
+  FR_barray * out = FR_barray_new( count );
+
+  for( int i = 0 ; i < count ; i++ ){
+    FR_barray_set( out , i , arr[i] );
+  }
+
+  return out;
+}
+
+void FR_barray_set( FR_barray * self , unsigned int index , unsigned char value ){
+  #ifdef FR_LOWLEVEL_DEBUG
+    assert( value < 2 );
+    assert( self->len > index );
+  #endif
+
+  unsigned int c_ptr = index/8;
+  unsigned int r_ptr = index%8;
+  
+  unsigned char mask = 1 << r_ptr;
+  self->chunk[ c_ptr ] |= mask;
+}
+
+/* returns 1 if set 0 otherwise */
+unsigned char FR_barray_get( FR_barray * self , unsigned char index ){
+  #ifdef FR_LOWLEVEL_DEBUG
+    assert( self->len > index );
+  #endif
+
+  unsigned int c_ptr = index/8;
+  unsigned int r_ptr = index%8;
+  
+  unsigned char mask = 1 << r_ptr;
+  return ((self->chunk[ c_ptr ] &= mask) > 0);
+}
+
+void FR_barray_copy_tuplet( FR_barray * dest , FR_barray * src , unsigned int dest_idx , unsigned int src_idx , unsigned int len ){
+  for( int i = 0 ; i < len ; i++ ){
+    FR_barray_set( dest , dest_idx + i , FR_barray_get( src , src_idx+i ) );
+  }
+}

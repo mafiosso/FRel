@@ -1,0 +1,15 @@
+#ifndef NKCTREE_H
+#define NKCTREE_H
+
+typedef struct FR_nkctree{
+    unsigned int row_count;
+    unsigned int set_size;
+    unsigned int k;
+    FR_barray ** rows;
+    void (*print)( struct FR_nkctree * );
+    void (*free)( struct FR_nkctree * );
+    void (*traverse)( struct FR_nkctree * , void * args );
+}
+
+#endif
+

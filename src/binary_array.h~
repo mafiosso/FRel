@@ -1,0 +1,11 @@
+#ifndef BINARY_ARR
+#define BINARY_ARR
+
+typedef struct FR_barray{
+  unsigned int len;
+  unsigned char * chunk;
+}FR_barray;
+
+FR_barray * FR_barray_new( unsigned int bits_count );
+
+#endif

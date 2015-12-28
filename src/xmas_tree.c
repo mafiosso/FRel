@@ -45,10 +45,49 @@ void FR_xmas_tree_print( FR_xmas_tree * self ){
     }
 }
 
+void FR_xmas_tree_2latex( FR_xmas_tree * self ){
+    unsigned int cols = self->set_size + 1;
+    unsigned int space_width = (cols*self->set_size) +
+        (cols-1) /* spaces between cols */;
+
+    printf("\% Non human readeable latex output\n");
+
+    for( int r = 0 ; r < self->row_count ; r++ ){
+        unsigned int s = (self->rows[r]->len / self->set_size);
+        int blank_cols = cols - s;
+        int left_blank_cols = blank_cols/2;
+        int right_blank_cols = left_blank_cols;
+
+        for( int b = 0 ; b < left_blank_cols ; b++ ){
+            printf(" & ");
+        }
+
+        for( int si = 0 ; si < s ; si++ ){
+            for( int bi = 0 ; bi < self->set_size ; bi++ ){
+                unsigned char bit = 
+                    FR_barray_get( self->rows[r] ,
+                                   bi + (si * self->set_size) );
+
+                printf("%d" , (unsigned int)bit );
+            }
+
+            if( si != (s-1) )
+                printf(" & ");
+        }
+
+        for( int b = 0 ; b < right_blank_cols ; b++ ){
+            printf(" & ");
+        }
+
+        printf(" \\\\ \n");
+    }
+}
+
 FR_xmas_tree * FR_xmas_tree_new( unsigned int set_size ){
   FR_xmas_tree * out = calloc( 1 , sizeof( FR_xmas_tree ) );
   out->free = FR_xmas_tree_destroy;
   out->print = FR_xmas_tree_print;
+  out->to_latex = FR_xmas_tree_2latex;
 
   if( set_size <= 1 ){
       unsigned char order1[2] = {0 , 1};

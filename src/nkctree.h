@@ -15,6 +15,9 @@ typedef struct FR_nkctree{
 
 FR_nkctree * FR_nkctree_new( unsigned int n , unsigned int k );
 void FR_nkctree_print( FR_nkctree * self );
+void FR_nkctree_2tikz( FR_nkctree * self , 
+                       FR_matrix * Q ,
+                       FR_matrix * T );
 
 #endif
 

@@ -14,6 +14,10 @@ void FR_cvector_free( FR_cvector * self ){
     free( self );
 }
 
+void FR_cvector_nth( FR_cvector * self, unsigned nth, void * out ){
+    memcpy(out , self+(nth*self->elem_size) , self->elem_size);
+}
+
 void FR_cvector_push( FR_cvector * self , void * item ){
     if( self->allocd <= self->size ){
         if( !self->allocd ){

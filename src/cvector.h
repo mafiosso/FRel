@@ -11,4 +11,5 @@ typedef struct FR_cvector{
 FR_cvector * FR_cvector_new( unsigned elem_size );
 void FR_cvector_push( FR_cvector * self , void * item );
 void FR_cvector_free( FR_cvector * self );
+void FR_cvector_nth( FR_cvector * self, unsigned nth, void * out );
 #endif

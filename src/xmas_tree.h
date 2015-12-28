@@ -6,6 +6,7 @@ typedef struct FR_xmas_tree{
   unsigned int row_count;
   FR_barray ** rows;
   void (*print)( struct FR_xmas_tree * );
+  void (*to_latex)( struct FR_xmas_tree * );
   void (*free) ( struct FR_xmas_tree * );
   void (*traverse_hensl) ( struct FR_xmas_tree * , unsigned char * (*hensl_func)(void *) );
 }FR_xmas_tree;

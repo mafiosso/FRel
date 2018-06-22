@@ -53,11 +53,14 @@ FR_ntree * FR_eq_generate_sol( FR_matrix * biggest_sol , FR_matrix * Q , FR_matr
 FR_ntree * FR_eq_solutions( FR_matrix * Q_matrix , FR_matrix * T_matrix );
 void FR_eq_inspect( FR_ntree * lattice );
 void FR_matrix_init( FR_matrix * self , const int m[self->rows][self->cols]  );
+int FR_matrix_eq( FR_matrix * m1, FR_matrix * m2 );
 
 /* fuzzy */
 int FR_solution_fuzz_p( FR_matrix * R , FR_matrix * Q , FR_matrix * T );
 int FR_minsolution_fuzz_p( FR_matrix * R , FR_matrix * Q ,
                            FR_matrix * T , int kchain);
+FR_matrix * FR_eq_gtst_fuzz( FR_matrix * Q_m , FR_matrix * T_m );
+
 FR_matrix * FR_eq_gtst( FR_matrix * Q_m , FR_matrix * T_m );
 void FR_matrix_fprint( FR_matrix * self );
 float FR_godel_joint( float l , float r );
@@ -66,4 +69,10 @@ void FR_matrix_init_f( FR_matrix * self , const float m[self->rows][self->cols] 
 
 int FR_fuzz_subset_p( FR_matrix * m1 , FR_matrix * m2 );
 int FR_fuzz_extra_subset_p( FR_matrix * m1 , FR_matrix * m2 );
+FR_ntree * FR_eq_generate_sol_fuzz( FR_matrix * biggest_sol , FR_matrix * Q , 
+                                    FR_matrix * T, unsigned k_chain );
+
+unsigned FR_ntree_size( FR_ntree * n );
+
+
 #endif

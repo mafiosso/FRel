@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include "base.h"
 #include "cvector.h"
@@ -193,8 +194,10 @@ FR_matrix * FR_matrix_o( FR_matrix * m1 , FR_matrix * m2 ,
 }
 
 int FR_matrix_eq( FR_matrix * m1, FR_matrix * m2 ){
+    assert( m1->rows == m2->rows && m1->cols == m2->cols );
+
     for( unsigned r = 0 ; r < m1->rows ; r++ ){
-        for( unsigned c = 0 ; c < m->cols ; c++ ){
+        for( unsigned c = 0 ; c < m1->cols ; c++ ){
             void * m1_cell_address = ((char*)m1->matrix_values[r])+(c*m1->bpc);
             void * m2_cell_address = ((char*)m2->matrix_values[r])+(c*m1->bpc);
             if( memcmp( m1_cell_address, m2_cell_address, m1->bpc ) )
@@ -306,13 +309,13 @@ FR_ntree * FR_eq_generate_sol( FR_matrix * biggest_sol , FR_matrix * Q , FR_matr
 
 FR_ntree * FR_eq_generate_sol_fuzz( FR_matrix * biggest_sol , FR_matrix * Q , 
                                     FR_matrix * T, unsigned k_chain ){
-    /* TODO: make it general not only for 1xN matrices ! */
-    /* first check if biggest_sol is solution*/
-    if( !FR_eq_solution_fuzz_p( biggest_sol , Q , T ) ){
+    if( !FR_solution_fuzz_p( biggest_sol , Q , T ) ){
         return NULL;
     }
 
-    float step = 1.0f / (float)k_chain;
+    //FR_matrix_fprint( biggest_sol );
+
+    float step = 1.0f / (float)(k_chain-1);
 
     FR_ntree * out = malloc( sizeof(FR_ntree) );
     out->childs_count = 0;
@@ -320,7 +323,7 @@ FR_ntree * FR_eq_generate_sol_fuzz( FR_matrix * biggest_sol , FR_matrix * Q ,
     out->value  = biggest_sol;
 
     for( int x = 0 ; x < biggest_sol->cols ; x++ ){
-        if( ((int*)(biggest_sol->matrix_values[0]))[x] == 0 ){
+        if( ((float*)(biggest_sol->matrix_values[0]))[x] <= 0.001f ){
             continue;            
         }
 
@@ -343,28 +346,40 @@ FR_ntree * FR_eq_generate_sol_fuzz( FR_matrix * biggest_sol , FR_matrix * Q ,
     return out;
 }
 
-void FR_ntree2set( FR_ntree * n , FR_cvector * v){
+unsigned FR_ntree2set( FR_ntree * n , FR_cvector * v){
     unsigned childs = n->childs_count;
     unsigned dups = 0;
 
     for( unsigned c = 0 ; c < childs; c++ ){
-        /* filter out duplicates */
-        FR_matrix * v = (FR_matrix*)n->value;
+        /* filter out duplicates and NULL */
+        FR_matrix * mv = (FR_matrix*)n->value;
+        if( !mv )
+            goto duplicate;
+
         for( unsigned i = 0; i < v->size; i++ ){
             FR_matrix * curval = NULL;
             FR_cvector_nth( v, i, &curval );
-            if( FR_matrix_eq( v, curval )){
+            if( FR_matrix_eq( mv, curval )){
                 dups++;
                 goto duplicate;
             }            
         }
         
-        FR_cvector_push( v, n->value );
-        dups += FR_nkctree2set( n->childs[c], v );
+        FR_cvector_push( v, &(n->value) );
+        dups += FR_ntree2set( n->childs[c], v );
         duplicate:
+        mv = NULL;
     }
 
     return dups;
+}
+
+unsigned FR_ntree_size( FR_ntree * n ){
+    unsigned out = (n->value ? 1 : 0);
+    for( unsigned c = 0 ; c < n->childs_count ; c++ ){
+        out += FR_ntree_size( n->childs[c] );
+    }
+    return out;
 }
 
 FR_matrix * FR_eq_gtst_fuzz( FR_matrix * Q_m , FR_matrix * T_m ){

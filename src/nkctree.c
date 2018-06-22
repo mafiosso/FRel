@@ -292,7 +292,12 @@ unsigned FR_nkctree_sols_count( FR_nkctree * self ,
                     count++;
                     if( FR_minsolution_fuzz_p( Sol , Q , T , self->k ) ){
                         (*min) = (*min) + 1;
+                        printf("[MIN]=>\n");
                     }
+                    else{
+                        printf("[SOL]=>\n");
+                    }
+                    FR_matrix_fprint( Sol );
                 }
 
                 FR_matrix_free( Sol );

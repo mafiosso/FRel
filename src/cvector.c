@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 #include "cvector.h"
 
 FR_cvector * FR_cvector_new( unsigned elem_size ){
@@ -15,7 +16,8 @@ void FR_cvector_free( FR_cvector * self ){
 }
 
 void FR_cvector_nth( FR_cvector * self, unsigned nth, void * out ){
-    memcpy(out , self+(nth*self->elem_size) , self->elem_size);
+    assert( nth < self->size );
+    memcpy(out , self->chunk+(nth*self->elem_size) , self->elem_size);
 }
 
 void FR_cvector_push( FR_cvector * self , void * item ){
@@ -31,7 +33,7 @@ void FR_cvector_push( FR_cvector * self , void * item ){
         }
     }
 
-    memcpy( self->chunk + (self->size * self->elem_size),
+    memcpy( ((char*)self->chunk) + (self->size * self->elem_size),
             item , self->elem_size );
 
     self->size++;
